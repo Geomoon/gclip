@@ -51,3 +51,4 @@
 
 # Documentación generada por godoc (si se genera localmente)
 /doc/
+*.db
