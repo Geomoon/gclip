@@ -1,0 +1,53 @@
+# Archivos de compilación y binarios
+###################################
+
+# Binarios de prueba o de la aplicación (generalmente tienen el mismo nombre que la carpeta)
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Binario de aplicación principal (puede ser el nombre de tu proyecto)
+# Ignorar el nombre del binario principal que la compilación de "go build" genera
+# Puedes necesitar ajustarlo si usas 'go install'
+<nombre_del_ejecutable>
+
+# Paquetes y objetos compilados por Go (se almacenan en el caché)
+*.o
+*.a
+
+# Binarios temporales de las pruebas (por ejemplo, myapp.test)
+*.test
+
+# Directorio de caché de pruebas Go, creado por Go 1.10+
+/go-test-results/
+
+
+# Módulos y dependencias
+#########################
+
+# Dependencias del módulo Go
+# El directorio 'vendor/' es donde se almacenan copias locales de las dependencias
+# si usas vendoring (comando 'go mod vendor').
+/vendor/
+
+
+# Archivos y directorios de herramientas
+#######################################
+
+# Entornos de desarrollo/IDEs (ejemplos comunes)
+.vscode/
+.idea/
+.DS_Store
+
+# Archivos de configuración de depuración (ejemplo: Delve)
+.dlvrc
+
+# Cobertura de código generada por 'go test -coverprofile'
+*.coverprofile
+
+# Salida de análisis de profiler
+*.pprof
+
+# Documentación generada por godoc (si se genera localmente)
+/doc/
