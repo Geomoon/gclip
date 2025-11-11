@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"gclip/pkg/data"
+	"gclip/pkg/db"
 	"log"
 
 	"github.com/gotk3/gotk3/gdk"
@@ -9,14 +9,14 @@ import (
 )
 
 type UI struct {
+	ds *db.Db
 }
 
-func NewUI() *UI {
-	return &UI{}
+func NewUI(ds *db.Db) *UI {
+	return &UI{ds: ds}
 }
 
 func (ui *UI) Run() {
-
 	gtk.Init(nil)
 	win, err := gtk.WindowNew(gtk.WINDOW_POPUP)
 	if err != nil {
@@ -57,7 +57,9 @@ func (ui *UI) Run() {
 	win.SetAcceptFocus(true)
 	win.SetFocusOnMap(true)
 
-	for _, item := range data.Data {
+	data, _ := ui.ds.Select(20)
+
+	for _, item := range data {
 		itemLabel, _ := gtk.LabelNew(item.Content)
 		itemLabel.SetHAlign(gtk.ALIGN_START)
 		list.Add(itemLabel)
