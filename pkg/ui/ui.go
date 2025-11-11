@@ -29,6 +29,7 @@ func (ui *UI) Run() {
 	win.AddEvents(int(gdk.KEY_PRESS_MASK))
 
 	win.Connect("key-press-event", keyPressHandler)
+	win.Connect("focus-out-event", closeOnFocusLost)
 
 	// Crear list
 	list, err := gtk.ListBoxNew()
@@ -43,6 +44,10 @@ func (ui *UI) Run() {
 	}
 	scrolled.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
 	scrolled.SetSizeRequest(200, 350)
+	scrolled.SetMarginTop(4)
+	scrolled.SetMarginBottom(4)
+	scrolled.SetMarginStart(4)
+	scrolled.SetMarginEnd(4)
 	scrolled.Add(list)
 
 	// Agregar scrolled directamente a la ventana
@@ -58,7 +63,6 @@ func (ui *UI) Run() {
 	win.SetFocusOnMap(true)
 
 	data, _ := ui.ds.Select(20)
-
 	for _, item := range data {
 		itemLabel, _ := gtk.LabelNew(item.Content)
 		itemLabel.SetHAlign(gtk.ALIGN_START)
@@ -127,36 +131,34 @@ func (ui *UI) Run() {
 	if y < geometry.GetY() {
 		y = geometry.GetY()
 	}
-
 	win.Move(x, y)
-
 	// Mostrar la ventana y todos sus widgets
 	win.ShowAll()
-	win.SetGravity(gdk.GDK_GRAVITY_CENTER)
 	list.GrabFocus()
-
 	gtk.Main()
 }
 
 // keyPressHandler es la función de callback para el evento "key-press-event".
 func keyPressHandler(win *gtk.Window, event *gdk.Event) bool {
 	// Convierte el evento genérico a un evento de tecla
-	log.Println("¡Tecla presionada!")
-
 	eventKey := gdk.EventKeyNewFromEvent(event)
 	if eventKey == nil {
 		return false
 	}
-
 	// Comprueba si el KeyVal es el de la tecla Escape
 	if eventKey.KeyVal() == gdk.KEY_Escape {
-		log.Println("¡Tecla ESCAPE presionada!")
-		// Aquí puedes poner la lógica que desees (ej: cerrar un diálogo, salir de la app, etc.)
-
-		// Si regresas 'true', indicas que el evento fue manejado y no debe propagarse más.
+		win.Destroy()
 		return true
 	}
-
 	// Regresa 'false' para permitir que el evento se siga propagando a otros manejadores
+	return false
+}
+
+func closeOnFocusLost(win *gtk.Window, dgk gtk.EventBox) bool {
+	// Verifica si la ventana ha perdido el foco
+	hasFocus := win.HasFocus()
+	if !hasFocus {
+		win.Destroy()
+	}
 	return false
 }
