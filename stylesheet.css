@@ -2,24 +2,23 @@
 
 .gclip-popup {
     background-color: rgba(30, 30, 30, 0.95);
-    border-radius: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    padding: 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0px;
+    box-shadow: none;
 }
 
 .gclip-main-box {
-    padding: 20px;
-    spacing: 15px;
+    padding: 0px;
+    /* spacing: 2px; */
 }
 
 /* Search Entry */
 .gclip-search-entry {
     background-color: rgba(50, 50, 50, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 10px 15px;
-    font-size: 14pt;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 6px;
     color: #ffffff;
 }
 
@@ -34,7 +33,7 @@
 }
 
 .gclip-list-box {
-    spacing: 5px;
+    spacing: 4px;
 }
 
 /* Clipboard Items */
@@ -42,8 +41,7 @@
     background-color: rgba(50, 50, 50, 0.5);
     border-radius: 6px;
     padding: 12px 15px;
-    spacing: 10px;
-    transition-duration: 150ms;
+    transition-duration: 0ms;
 }
 
 .gclip-item:hover {
@@ -52,13 +50,11 @@
 
 .gclip-item.selected {
     background-color: rgba(53, 132, 228, 0.4);
-    border: 1px solid rgba(53, 132, 228, 0.8);
 }
 
 .gclip-item-index {
     color: rgba(255, 255, 255, 0.5);
-    font-size: 11pt;
-    font-weight: bold;
+    font-size: 9pt;
     min-width: 30px;
 }
 
@@ -68,7 +64,7 @@
 
 .gclip-item-text {
     color: #ffffff;
-    font-size: 11pt;
+    font-size: 10pt;
 }
 
 .gclip-item-time {

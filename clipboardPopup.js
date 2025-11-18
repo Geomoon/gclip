@@ -5,9 +5,9 @@ import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 
-const MAX_PREVIEW_LENGTH = 100;
-const POPUP_WIDTH = 600;
-const POPUP_HEIGHT = 400;
+const MAX_PREVIEW_LENGTH = 20;
+const POPUP_WIDTH = 500;
+const POPUP_HEIGHT = 350;
 
 export const ClipboardPopup = GObject.registerClass(
 class ClipboardPopup extends ModalDialog.ModalDialog {
@@ -62,7 +62,7 @@ class ClipboardPopup extends ModalDialog.ModalDialog {
             style_class: 'gclip-list-box'
         });
 
-        scrollView.add_actor(this._listBox);
+        scrollView.add_child(this._listBox);
         mainBox.add_child(scrollView);
 
         // Footer con instrucciones
