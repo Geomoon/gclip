@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.gclip" path="/org/gnome/shell/extensions/gclip/">
+    
+    <key name="max-history-items" type="i">
+      <default>100</default>
+      <summary>Maximum clipboard history items</summary>
+      <description>
+        Maximum number of items to keep in clipboard history (text and images combined)
+      </description>
+    </key>
+
+    <key name="show-clipboard-popup" type="as">
+      <default>['&lt;Super&gt;v']</default>
+      <summary>Keyboard shortcut to show clipboard popup</summary>
+      <description>
+        Keyboard shortcut to open the clipboard history popup window
+      </description>
+    </key>
+
+  </schema>
+</schemalist>

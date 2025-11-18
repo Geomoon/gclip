@@ -1,0 +1,92 @@
+/* GClip Extension Stylesheet */
+
+.gclip-popup {
+    background-color: rgba(30, 30, 30, 0.95);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.gclip-main-box {
+    padding: 20px;
+    spacing: 15px;
+}
+
+/* Search Entry */
+.gclip-search-entry {
+    background-color: rgba(50, 50, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 14pt;
+    color: #ffffff;
+}
+
+.gclip-search-entry:focus {
+    border-color: rgba(53, 132, 228, 0.8);
+    background-color: rgba(60, 60, 60, 0.9);
+}
+
+/* Scroll View */
+.gclip-scroll-view {
+    background-color: transparent;
+}
+
+.gclip-list-box {
+    spacing: 5px;
+}
+
+/* Clipboard Items */
+.gclip-item {
+    background-color: rgba(50, 50, 50, 0.5);
+    border-radius: 6px;
+    padding: 12px 15px;
+    spacing: 10px;
+    transition-duration: 150ms;
+}
+
+.gclip-item:hover {
+    background-color: rgba(70, 70, 70, 0.7);
+}
+
+.gclip-item.selected {
+    background-color: rgba(53, 132, 228, 0.4);
+    border: 1px solid rgba(53, 132, 228, 0.8);
+}
+
+.gclip-item-index {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11pt;
+    font-weight: bold;
+    min-width: 30px;
+}
+
+.gclip-item-icon {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.gclip-item-text {
+    color: #ffffff;
+    font-size: 11pt;
+}
+
+.gclip-item-time {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 9pt;
+}
+
+/* Empty State */
+.gclip-empty-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12pt;
+    padding: 40px;
+}
+
+/* Footer */
+.gclip-footer {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 9pt;
+    padding: 10px 0 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

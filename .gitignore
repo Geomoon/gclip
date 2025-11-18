@@ -1,0 +1,23 @@
+# Compiled schemas
+schemas/gschemas.compiled
+
+# Build artifacts
+*.gschema.valid
+
+# Local data (user's clipboard history)
+*.json
+images/
+
+# IDE
+.vscode/
+.idea/
+
+# System
+.DS_Store
+*~
+*.swp
+*.bak
+
+# Package files
+*.zip
+*.shell-extension.zip
