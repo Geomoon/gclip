@@ -20,3 +20,5 @@ images/
 # Package files
 *.zip
 *.shell-extension.zip
+
+.example-clipboard-indicator/

@@ -1,13 +1,14 @@
 import St from 'gi://St';
 import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
+import Meta from 'gi://Meta';
+import Clutter from 'gi://Clutter';
 
-const HISTORY_DIR = GLib.build_filenamev([
-    GLib.get_user_data_dir(),
-    'gclip'
+const CACHE_DIR = GLib.build_filenamev([
+    GLib.get_user_cache_dir(),
+    'gclip@usuario.dev'
 ]);
-const HISTORY_FILE = GLib.build_filenamev([HISTORY_DIR, 'history.json']);
-const IMAGES_DIR = GLib.build_filenamev([HISTORY_DIR, 'images']);
+const HISTORY_FILE = GLib.build_filenamev([CACHE_DIR, 'clipboard-history.json']);
 
 export class ClipboardManager {
     constructor(settings) {
@@ -24,16 +25,14 @@ export class ClipboardManager {
     }
 
     _ensureDirectories() {
-        [HISTORY_DIR, IMAGES_DIR].forEach(dir => {
-            let file = Gio.File.new_for_path(dir);
-            try {
-                if (!file.query_exists(null)) {
-                    file.make_directory_with_parents(null);
-                }
-            } catch (e) {
-                log(`Error creating directory ${dir}: ${e}`);
+        let dir = Gio.File.new_for_path(CACHE_DIR);
+        try {
+            if (!dir.query_exists(null)) {
+                dir.make_directory_with_parents(null);
             }
-        });
+        } catch (e) {
+            log(`GClip: Error creating directory: ${e}`);
+        }
     }
 
     _startMonitoring() {
@@ -45,28 +44,43 @@ export class ClipboardManager {
     }
 
     _checkClipboard() {
-        // Intentar obtener texto
-        this._clipboard.get_text(St.ClipboardType.CLIPBOARD, (clipboard, text) => {
-            if (text && text.trim() && text !== this._lastText) {
-                this._lastText = text;
-                this._addToHistory({
-                    type: 'text',
-                    content: text,
-                    timestamp: Date.now()
-                });
-            }
-        });
+        // Intentar obtener contenido del clipboard con múltiples mimetypes
+        const mimetypes = [
+            "text/plain;charset=utf-8",
+            "text/plain",
+            'image/png',
+            'image/jpeg',
+            'image/jpg',
+        ];
 
-        // Intentar obtener imagen (PNG)
-        this._clipboard.get_content(St.ClipboardType.CLIPBOARD, 'image/png', (clipboard, bytes) => {
-            if (bytes && bytes.length > 0) {
-                const hash = this._hashBytes(bytes);
-                if (hash !== this._lastImageHash) {
-                    this._lastImageHash = hash;
-                    this._saveImage(bytes);
+        for (let mimetype of mimetypes) {
+            this._clipboard.get_content(St.ClipboardType.CLIPBOARD, mimetype, (clipboard, bytes) => {
+                if (bytes && bytes.get_size && bytes.get_size() > 0) {
+                    const size = bytes.get_size();
+                    const data = bytes.get_data();
+                    
+                    if (mimetype.startsWith('text/')) {
+                        // Es texto
+                        const text = new TextDecoder().decode(data);
+                        if (text && text.trim() && text !== this._lastText) {
+                            this._lastText = text;
+                            this._addToHistory({
+                                favorite: false,
+                                mimetype: 'text/plain;charset=utf-8',
+                                contents: text
+                            });
+                        }
+                    } else if (mimetype.startsWith('image/')) {
+                        // Es imagen
+                        const hash = this._hashBytes(data);
+                        if (hash !== this._lastImageHash) {
+                            this._lastImageHash = hash;
+                            this._saveImage(data, mimetype);
+                        }
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     _hashBytes(bytes) {
@@ -79,63 +93,50 @@ export class ClipboardManager {
         return hash.toString();
     }
 
-    _saveImage(bytes) {
-        const filename = `${Date.now()}.png`;
-        const filepath = GLib.build_filenamev([IMAGES_DIR, filename]);
+    _saveImage(data, mimetype) {
+        const hash = Math.abs(parseInt(this._hashBytes(data)));
+        const filepath = GLib.build_filenamev([CACHE_DIR, hash.toString()]);
         
         try {
             let file = Gio.File.new_for_path(filepath);
             file.replace_contents(
-                bytes,
+                data,
                 null,
                 false,
                 Gio.FileCreateFlags.NONE,
                 null
             );
 
-            // Crear miniatura
-            const thumbPath = this._createThumbnail(filepath);
-
             this._addToHistory({
-                type: 'image',
-                filename: filename,
-                path: filepath,
-                thumbnail: thumbPath,
-                size: bytes.length,
-                timestamp: Date.now()
+                favorite: false,
+                mimetype: mimetype,
+                contents: filepath
             });
         } catch (e) {
-            log(`Error saving image: ${e}`);
+            log(`GClip: Error saving image: ${e}`);
+            log(`GClip: Stack: ${e.stack}`);
         }
-    }
-
-    _createThumbnail(imagePath) {
-        // Aquí podrías usar GdkPixbuf para crear miniaturas
-        // Por simplicidad, usamos la imagen original
-        return imagePath;
     }
 
     _addToHistory(item) {
-        // Evitar duplicados inmediatos
-        const last = this._history[0];
-        if (last) {
-            if (last.type === 'text' && item.type === 'text' && 
-                last.content === item.content) {
-                return;
-            }
-            if (last.type === 'image' && item.type === 'image' &&
-                last.filename === item.filename) {
-                return;
-            }
+        // Buscar si el item ya existe (por contenido)
+        const existingIndex = this._history.findIndex(h => h.contents === item.contents);
+        
+        if (existingIndex !== -1) {
+            // Si existe, removerlo para re-agregarlo al inicio
+            const existing = this._history.splice(existingIndex, 1)[0];
+            // Preservar el estado de favorito si existía
+            item.favorite = existing.favorite;
         }
 
+        // Agregar al inicio
         this._history.unshift(item);
         
         // Mantener límite y limpiar archivos viejos
         while (this._history.length > this._maxItems) {
             const removed = this._history.pop();
-            if (removed.type === 'image') {
-                this._deleteImageFile(removed.path);
+            if (removed.mimetype && removed.mimetype.startsWith('image/')) {
+                this._deleteImageFile(removed.contents);
             }
         }
 
@@ -177,8 +178,8 @@ export class ClipboardManager {
                     this._history = JSON.parse(new TextDecoder().decode(contents));
                     // Limpiar referencias a imágenes que ya no existen
                     this._history = this._history.filter(item => {
-                        if (item.type === 'image') {
-                            let imgFile = Gio.File.new_for_path(item.path);
+                        if (item.mimetype && item.mimetype.startsWith('image/')) {
+                            let imgFile = Gio.File.new_for_path(item.contents);
                             return imgFile.query_exists(null);
                         }
                         return true;
@@ -186,7 +187,7 @@ export class ClipboardManager {
                 }
             }
         } catch (e) {
-            log(`Error loading history: ${e}`);
+            log(`GClip: Error loading history: ${e}`);
             this._history = [];
         }
     }
@@ -196,17 +197,17 @@ export class ClipboardManager {
     }
 
     copyToClipboard(item) {
-        if (item.type === 'text') {
-            this._clipboard.set_text(St.ClipboardType.CLIPBOARD, item.content);
-        } else if (item.type === 'image') {
+        if (item.mimetype === 'text/plain;charset=utf-8') {
+            this._clipboard.set_text(St.ClipboardType.CLIPBOARD, item.contents);
+        } else if (item.mimetype && item.mimetype.startsWith('image/')) {
             try {
-                let file = Gio.File.new_for_path(item.path);
-                let [success, contents] = file.load_contents(null);
+                let file = Gio.File.new_for_path(item.contents);
+                let [success, bytes] = file.load_contents(null);
                 if (success) {
-                    this._clipboard.set_content(St.ClipboardType.CLIPBOARD, 'image/png', contents);
+                    this._clipboard.set_content(St.ClipboardType.CLIPBOARD, item.mimetype, bytes);
                 }
             } catch (e) {
-                log(`Error copying image to clipboard: ${e}`);
+                log(`GClip: Error copying image: ${e}`);
             }
         }
     }
@@ -214,8 +215,8 @@ export class ClipboardManager {
     clearHistory() {
         // Eliminar todas las imágenes
         this._history.forEach(item => {
-            if (item.type === 'image') {
-                this._deleteImageFile(item.path);
+            if (item.mimetype && item.mimetype.startsWith('image/')) {
+                this._deleteImageFile(item.contents);
             }
         });
         

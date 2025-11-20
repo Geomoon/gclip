@@ -11,7 +11,7 @@
 /* Search Entry */
 .gclip-search-entry {
     background-color: rgba(50, 50, 50, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 6px;
     padding: 6px 10px;
     font-size: 10pt;
@@ -48,7 +48,6 @@
 
 .gclip-item.selected {
     background-color: rgba(53, 132, 228, 0.5);
-    border: 1px solid rgba(53, 132, 228, 0.8);
 }
 
 .gclip-item-index {
@@ -60,6 +59,12 @@
 
 .gclip-item-icon {
     color: rgba(255, 255, 255, 0.7);
+}
+
+.gclip-item-thumbnail {
+    border-radius: 4px;
+    margin-right: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .gclip-item-text {

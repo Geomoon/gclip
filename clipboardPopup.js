@@ -2,6 +2,8 @@ import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import Gio from 'gi://Gio';
+import GdkPixbuf from 'gi://GdkPixbuf';
+import Cogl from 'gi://Cogl';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 const MAX_PREVIEW_LENGTH = 60;
@@ -156,10 +158,10 @@ class ClipboardPopup extends St.Widget {
         });
         itemBox.add_child(indexLabel);
 
-        if (item.type === 'text') {
+        if (item.mimetype === 'text/plain;charset=utf-8') {
             // Preview del texto
-            let preview = item.content.replace(/\n/g, ' ').substring(0, MAX_PREVIEW_LENGTH);
-            if (item.content.length > MAX_PREVIEW_LENGTH) {
+            let preview = item.contents.replace(/\n/g, ' ').substring(0, MAX_PREVIEW_LENGTH);
+            if (item.contents.length > MAX_PREVIEW_LENGTH) {
                 preview += '...';
             }
 
@@ -170,33 +172,29 @@ class ClipboardPopup extends St.Widget {
             });
             itemBox.add_child(label);
 
-        } else if (item.type === 'image') {
-            // Icono de imagen
-            let icon = new St.Icon({
-                icon_name: 'image-x-generic-symbolic',
-                style_class: 'gclip-item-icon',
-                icon_size: 24
-            });
-            itemBox.add_child(icon);
+        } else if (item.mimetype && item.mimetype.startsWith('image/')) {
+            // Previsualización de la imagen
+            let thumbnail = this._createImageThumbnail(item.contents);
+            if (thumbnail) {
+                itemBox.add_child(thumbnail);
+            } else {
+                // Fallback: icono si falla la carga
+                let icon = new St.Icon({
+                    icon_name: 'image-x-generic-symbolic',
+                    style_class: 'gclip-item-icon',
+                    icon_size: 32
+                });
+                itemBox.add_child(icon);
+            }
 
             // Info de la imagen
-            let sizeKB = Math.round(item.size / 1024);
             let label = new St.Label({
-                text: `Image (${sizeKB} KB)`,
+                text: `Image`,
                 style_class: 'gclip-item-text',
                 x_expand: true
             });
             itemBox.add_child(label);
         }
-
-        // Timestamp
-        let date = new Date(item.timestamp);
-        let timeStr = this._formatTime(date);
-        let timeLabel = new St.Label({
-            text: timeStr,
-            style_class: 'gclip-item-time'
-        });
-        itemBox.add_child(timeLabel);
 
         // Event handlers
         itemBox.connect('button-press-event', () => {
@@ -210,6 +208,51 @@ class ClipboardPopup extends St.Widget {
         });
 
         return itemBox;
+    }
+
+    _createImageThumbnail(imagePath) {
+        try {
+            let file = Gio.File.new_for_path(imagePath);
+            if (!file.query_exists(null)) {
+                return null;
+            }
+
+            // Cargar imagen y crear miniatura
+            let pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                imagePath,
+                48,  // ancho máximo
+                48,  // alto máximo
+                true // mantener aspecto
+            );
+
+            let image = new St.Icon({
+                gicon: Gio.FileIcon.new(file),
+                icon_size: 32,
+                style_class: 'gclip-item-thumbnail'
+            });
+
+            // Usar Clutter.Image para mostrar el pixbuf
+            let clutterImage = new Clutter.Image();
+            clutterImage.set_data(
+                pixbuf.get_pixels(),
+                pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
+                pixbuf.get_width(),
+                pixbuf.get_height(),
+                pixbuf.get_rowstride()
+            );
+
+            let imageWidget = new St.Widget({
+                width: 32,
+                height: 32,
+                style_class: 'gclip-item-thumbnail',
+                content: clutterImage
+            });
+
+            return imageWidget;
+        } catch (e) {
+            log(`Error creating thumbnail: ${e}`);
+            return null;
+        }
     }
 
     _formatTime(date) {
@@ -238,8 +281,8 @@ class ClipboardPopup extends St.Widget {
         this._items = [];
 
         const filtered = this._history.filter((item, index) => {
-            if (item.type === 'text') {
-                return item.content.toLowerCase().includes(searchText);
+            if (item.mimetype === 'text/plain;charset=utf-8') {
+                return item.contents.toLowerCase().includes(searchText);
             }
             return false; // Por ahora no filtramos imágenes
         });
@@ -336,23 +379,25 @@ class ClipboardPopup extends St.Widget {
     }
     
     close() {
-        this.ease({
-            opacity: 0,
-            duration: 100,
-            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-            onComplete: () => {
-                this.destroy();
-            }
-        });
-    }
-    
-    destroy() {
+        if (this._closing) return;
+        this._closing = true;
+        
         if (this._capturedEventId) {
             global.stage.disconnect(this._capturedEventId);
             this._capturedEventId = null;
         }
         
-        Main.layoutManager.removeChrome(this);
-        super.destroy();
+        this.ease({
+            opacity: 0,
+            duration: 100,
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            onComplete: () => {
+                try {
+                    Main.layoutManager.removeChrome(this);
+                } catch(e) {
+                    // Ya fue removido
+                }
+            }
+        });
     }
 });
