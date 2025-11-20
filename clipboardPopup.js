@@ -8,7 +8,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 const MAX_PREVIEW_LENGTH = 60;
 const POPUP_WIDTH = 400;
-const POPUP_HEIGHT = 300;
+const POPUP_HEIGHT = 350;
 
 export const ClipboardPopup = GObject.registerClass(
 class ClipboardPopup extends St.Widget {
@@ -22,6 +22,7 @@ class ClipboardPopup extends St.Widget {
         this._history = history;
         this._clipboardManager = clipboardManager;
         this._selectedIndex = 0;
+        this._keyboardMode = false; // Flag para saber si se está usando teclado
 
         this._buildUI();
         this._populateList();
@@ -74,7 +75,7 @@ class ClipboardPopup extends St.Widget {
         mainBox.add_child(this._searchEntry);
 
         // ScrollView para la lista
-        let scrollView = new St.ScrollView({
+        this._scrollView = new St.ScrollView({
             style_class: 'gclip-scroll-view',
             hscrollbar_policy: St.PolicyType.NEVER,
             vscrollbar_policy: St.PolicyType.AUTOMATIC,
@@ -86,8 +87,8 @@ class ClipboardPopup extends St.Widget {
             style_class: 'gclip-list-box'
         });
 
-        scrollView.add_child(this._listBox);
-        mainBox.add_child(scrollView);
+        this._scrollView.add_child(this._listBox);
+        mainBox.add_child(this._scrollView);
 
         // Footer con instrucciones
         let footer = new St.Label({
@@ -102,6 +103,11 @@ class ClipboardPopup extends St.Widget {
     _onCapturedEvent(actor, event) {
         if (event.type() === Clutter.EventType.KEY_PRESS) {
             return this._onKeyPress(event);
+        }
+        
+        if (event.type() === Clutter.EventType.MOTION) {
+            // Desactivar modo teclado cuando se mueve el mouse
+            this._keyboardMode = false;
         }
         
         if (event.type() === Clutter.EventType.BUTTON_PRESS) {
@@ -203,8 +209,16 @@ class ClipboardPopup extends St.Widget {
         });
 
         itemBox.connect('enter-event', () => {
+            // Desactivar modo teclado cuando el mouse se mueve
+            this._keyboardMode = false;
             this._selectedIndex = index;
             this._updateSelection();
+        });
+        
+        itemBox.connect('motion-event', () => {
+            // También desactivar con movimiento del mouse
+            this._keyboardMode = false;
+            return Clutter.EVENT_PROPAGATE;
         });
 
         return itemBox;
@@ -311,22 +325,52 @@ class ClipboardPopup extends St.Widget {
         this._items.forEach((item, index) => {
             if (index === this._selectedIndex) {
                 item.add_style_class_name('selected');
+                
+                // Hacer scroll automático para mantener el item visible
+                this._scrollToItem(item);
             } else {
                 item.remove_style_class_name('selected');
             }
         });
+    }
+    
+    _scrollToItem(item) {
+        if (!this._scrollView || !this._keyboardMode) return;
+        
+        const adjustment = this._scrollView.get_vscroll_bar().get_adjustment();
+        const pageSize = adjustment.page_size;
+        const value = adjustment.value;
+
+        const box = item.get_allocation_box();
+        const itemY = box.y1;
+        const itemHeight = box.y2 - itemY;
+
+        const margin = 10; // Margen para mejor visibilidad
+
+        if (itemY < value + margin) {
+            // Item está arriba, scroll hacia arriba
+            adjustment.value = Math.max(0, itemY - margin);
+        } else if (itemY + itemHeight > value + pageSize - margin) {
+            // Item está abajo, scroll hacia abajo
+            adjustment.value = Math.min(
+                adjustment.upper - pageSize,
+                itemY + itemHeight - pageSize + margin
+            );
+        }
     }
 
     _onKeyPress(event) {
         const symbol = event.get_key_symbol();
 
         if (symbol === Clutter.KEY_Up) {
+            this._keyboardMode = true;
             this._selectedIndex = Math.max(0, this._selectedIndex - 1);
             this._updateSelection();
             return Clutter.EVENT_STOP;
         }
 
         if (symbol === Clutter.KEY_Down) {
+            this._keyboardMode = true;
             this._selectedIndex = Math.min(this._items.length - 1, this._selectedIndex + 1);
             this._updateSelection();
             return Clutter.EVENT_STOP;

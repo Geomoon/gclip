@@ -3,6 +3,7 @@ import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 import Meta from 'gi://Meta';
 import Clutter from 'gi://Clutter';
+import Shell from 'gi://Shell';
 
 const CACHE_DIR = GLib.build_filenamev([
     GLib.get_user_cache_dir(),
@@ -36,11 +37,21 @@ export class ClipboardManager {
     }
 
     _startMonitoring() {
-        // Monitorear cambios en el portapapeles cada 500ms
-        this._monitorId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => {
-            this._checkClipboard();
-            return GLib.SOURCE_CONTINUE;
-        });
+        // Usar el sistema de eventos de Meta.Display en lugar de polling
+        const metaDisplay = Shell.Global.get().get_display();
+        const selection = metaDisplay.get_selection();
+        
+        this._selectionOwnerChangedId = selection.connect('owner-changed', 
+            (selection, selectionType, selectionSource) => {
+                // Solo procesar eventos del CLIPBOARD (no PRIMARY)
+                if (selectionType === Meta.SelectionType.SELECTION_CLIPBOARD) {
+                    log('GClip: Clipboard owner changed, checking content...');
+                    this._checkClipboard();
+                }
+            }
+        );
+        
+        log('GClip: Started monitoring clipboard with owner-changed event');
     }
 
     _checkClipboard() {
@@ -236,9 +247,12 @@ export class ClipboardManager {
     }
 
     destroy() {
-        if (this._monitorId) {
-            GLib.source_remove(this._monitorId);
-            this._monitorId = null;
+        if (this._selectionOwnerChangedId) {
+            const metaDisplay = Shell.Global.get().get_display();
+            const selection = metaDisplay.get_selection();
+            selection.disconnect(this._selectionOwnerChangedId);
+            this._selectionOwnerChangedId = null;
+            log('GClip: Stopped monitoring clipboard');
         }
     }
 }
