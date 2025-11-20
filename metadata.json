@@ -1,0 +1,12 @@
+{
+  "name": "GClip",
+  "description": "Clipboard manager with popup interface for GNOME Shell (Wayland compatible)",
+  "uuid": "gclip@usuario.dev",
+  "shell-version": [
+    "45",
+    "46"
+  ],
+  "url": "https://github.com/usuario/gclip",
+  "version": 1,
+  "settings-schema": "org.gnome.shell.extensions.gclip"
+}
