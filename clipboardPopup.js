@@ -3,16 +3,19 @@ import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import Gio from 'gi://Gio';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 
-const MAX_PREVIEW_LENGTH = 20;
-const POPUP_WIDTH = 500;
-const POPUP_HEIGHT = 350;
+const MAX_PREVIEW_LENGTH = 60;
+const POPUP_WIDTH = 400;
+const POPUP_HEIGHT = 300;
 
 export const ClipboardPopup = GObject.registerClass(
-class ClipboardPopup extends ModalDialog.ModalDialog {
+class ClipboardPopup extends St.Widget {
     _init(history, clipboardManager) {
-        super._init({ styleClass: 'gclip-popup' });
+        super._init({
+            reactive: true,
+            can_focus: true,
+            track_hover: true
+        });
 
         this._history = history;
         this._clipboardManager = clipboardManager;
@@ -20,13 +23,36 @@ class ClipboardPopup extends ModalDialog.ModalDialog {
 
         this._buildUI();
         this._populateList();
+        
+        // Añadir al layout manager
+        Main.layoutManager.addTopChrome(this);
+        this._positionPopup();
+        
+        // Capturar eventos globales
+        this._capturedEventId = global.stage.connect('captured-event', 
+            this._onCapturedEvent.bind(this));
+    }
+
+    _positionPopup() {
+        // Obtener posición del cursor
+        let [x, y] = global.get_pointer();
+        let monitor = Main.layoutManager.currentMonitor;
+        
+        // Ajustar para que no se salga de la pantalla
+        x = Math.min(x, monitor.x + monitor.width - POPUP_WIDTH - 20);
+        y = Math.min(y, monitor.y + monitor.height - POPUP_HEIGHT - 20);
+        x = Math.max(x, monitor.x + 20);
+        y = Math.max(y, monitor.y + 20);
+        
+        this.set_position(x, y);
+        this.set_size(POPUP_WIDTH, POPUP_HEIGHT);
     }
 
     _buildUI() {
-        // Contenedor principal
+        // Contenedor principal con fondo
         let mainBox = new St.BoxLayout({
             vertical: true,
-            style_class: 'gclip-main-box',
+            style_class: 'gclip-popup',
             width: POPUP_WIDTH,
             height: POPUP_HEIGHT
         });
@@ -34,17 +60,13 @@ class ClipboardPopup extends ModalDialog.ModalDialog {
         // Barra de búsqueda
         this._searchEntry = new St.Entry({
             style_class: 'gclip-search-entry',
-            hint_text: 'Search clipboard history...',
+            hint_text: 'Search...',
             can_focus: true,
             x_expand: true
         });
 
         this._searchEntry.clutter_text.connect('text-changed', () => {
             this._filterList();
-        });
-
-        this._searchEntry.clutter_text.connect('key-press-event', (actor, event) => {
-            return this._onKeyPress(event);
         });
 
         mainBox.add_child(this._searchEntry);
@@ -72,10 +94,28 @@ class ClipboardPopup extends ModalDialog.ModalDialog {
         });
         mainBox.add_child(footer);
 
-        this.contentLayout.add_child(mainBox);
-
-        // Dar foco al search entry
-        this._searchEntry.grab_key_focus();
+        this.add_child(mainBox);
+    }
+    
+    _onCapturedEvent(actor, event) {
+        if (event.type() === Clutter.EventType.KEY_PRESS) {
+            return this._onKeyPress(event);
+        }
+        
+        if (event.type() === Clutter.EventType.BUTTON_PRESS) {
+            // Cerrar si click fuera del popup
+            let [x, y] = event.get_coords();
+            let [popupX, popupY] = this.get_position();
+            let [popupW, popupH] = this.get_size();
+            
+            if (x < popupX || x > popupX + popupW || 
+                y < popupY || y > popupY + popupH) {
+                this.close();
+                return Clutter.EVENT_STOP;
+            }
+        }
+        
+        return Clutter.EVENT_PROPAGATE;
     }
 
     _populateList() {
@@ -285,7 +325,34 @@ class ClipboardPopup extends ModalDialog.ModalDialog {
     }
 
     open() {
-        super.open();
-        this._searchEntry.grab_key_focus();
+        this.show();
+        this.opacity = 0;
+        this.ease({
+            opacity: 255,
+            duration: 150,
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD
+        });
+        global.stage.set_key_focus(this._searchEntry);
+    }
+    
+    close() {
+        this.ease({
+            opacity: 0,
+            duration: 100,
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            onComplete: () => {
+                this.destroy();
+            }
+        });
+    }
+    
+    destroy() {
+        if (this._capturedEventId) {
+            global.stage.disconnect(this._capturedEventId);
+            this._capturedEventId = null;
+        }
+        
+        Main.layoutManager.removeChrome(this);
+        super.destroy();
     }
 });

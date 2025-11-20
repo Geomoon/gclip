@@ -1,25 +1,22 @@
 /* GClip Extension Stylesheet */
 
 .gclip-popup {
-    background-color: rgba(30, 30, 30, 0.95);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0px;
-    box-shadow: none;
-}
-
-.gclip-main-box {
-    padding: 0px;
-    /* spacing: 2px; */
+    background-color: rgba(25, 25, 25, 0.98);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
 }
 
 /* Search Entry */
 .gclip-search-entry {
     background-color: rgba(50, 50, 50, 0.8);
-    border: none;
-    border-radius: 4px;
-    padding: 4px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 10pt;
     color: #ffffff;
+    margin-bottom: 8px;
 }
 
 .gclip-search-entry:focus {
@@ -38,9 +35,10 @@
 
 /* Clipboard Items */
 .gclip-item {
-    background-color: rgba(50, 50, 50, 0.5);
-    border-radius: 6px;
-    padding: 12px 15px;
+    background-color: rgba(50, 50, 50, 0.4);
+    border-radius: 5px;
+    padding: 8px 10px;
+    margin: 2px 0;
     transition-duration: 0ms;
 }
 
@@ -49,13 +47,15 @@
 }
 
 .gclip-item.selected {
-    background-color: rgba(53, 132, 228, 0.4);
+    background-color: rgba(53, 132, 228, 0.5);
+    border: 1px solid rgba(53, 132, 228, 0.8);
 }
 
 .gclip-item-index {
     color: rgba(255, 255, 255, 0.5);
-    font-size: 9pt;
-    min-width: 30px;
+    font-size: 8pt;
+    font-weight: bold;
+    min-width: 25px;
 }
 
 .gclip-item-icon {
@@ -64,12 +64,12 @@
 
 .gclip-item-text {
     color: #ffffff;
-    font-size: 10pt;
+    font-size: 9pt;
 }
 
 .gclip-item-time {
     color: rgba(255, 255, 255, 0.4);
-    font-size: 9pt;
+    font-size: 8pt;
 }
 
 /* Empty State */
@@ -81,8 +81,9 @@
 
 /* Footer */
 .gclip-footer {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 9pt;
-    padding: 10px 0 0 0;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 8pt;
+    padding: 6px 0 0 0;
+    margin-top: 4px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
