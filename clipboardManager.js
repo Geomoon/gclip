@@ -163,22 +163,34 @@ export class ClipboardManager {
         );
     }
 
-    _loadHistory() {
+    async _loadHistory() {
         try {
             let file = Gio.File.new_for_path(HISTORY_FILE);
             if (file.query_exists(null)) {
-                let [success, contents] = file.load_contents(null);
-                if (success) {
-                    this._history = JSON.parse(new TextDecoder().decode(contents));
-                    // Limpiar referencias a imágenes que ya no existen
-                    this._history = this._history.filter(item => {
-                        if (item.mimetype && item.mimetype.startsWith('image/')) {
-                            let imgFile = Gio.File.new_for_path(item.contents);
-                            return imgFile.query_exists(null);
+                let [contents] = await new Promise((resolve, reject) => {
+                    file.load_contents_async(null, (file, res) => {
+                        try {
+                            let [success, contents] = file.load_contents_finish(res);
+                            if (success) {
+                                resolve([contents]);
+                            } else {
+                                reject(new Error('Failed to load contents'));
+                            }
+                        } catch (e) {
+                            reject(e);
                         }
-                        return true;
                     });
-                }
+                });
+                
+                this._history = JSON.parse(new TextDecoder().decode(contents));
+                // Limpiar referencias a imágenes que ya no existen
+                this._history = this._history.filter(item => {
+                    if (item.mimetype && item.mimetype.startsWith('image/')) {
+                        let imgFile = Gio.File.new_for_path(item.contents);
+                        return imgFile.query_exists(null);
+                    }
+                    return true;
+                });
             }
         } catch (e) {
            console.debug(`GClip: Error loading history: ${e}`);
@@ -190,14 +202,29 @@ export class ClipboardManager {
         return this._history;
     }
 
-    copyToClipboard(item) {
+    async copyToClipboard(item) {
         if (item.mimetype === 'text/plain;charset=utf-8') {
             this._clipboard.set_text(St.ClipboardType.CLIPBOARD, item.contents);
         } else if (item.mimetype && item.mimetype.startsWith('image/')) {
             let file = Gio.File.new_for_path(item.contents);
-            let [success, bytes] = file.load_contents(null);
-            if (success) {
+            try {
+                let bytes = await new Promise((resolve, reject) => {
+                    file.load_contents_async(null, (file, res) => {
+                        try {
+                            let [success, contents] = file.load_contents_finish(res);
+                            if (success) {
+                                resolve(contents);
+                            } else {
+                                reject(new Error('Failed to load image'));
+                            }
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                });
                 this._clipboard.set_content(St.ClipboardType.CLIPBOARD, item.mimetype, bytes);
+            } catch (e) {
+                console.debug(`GClip: Error loading image: ${e}`);
             }
         }
     }
