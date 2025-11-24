@@ -27,12 +27,8 @@ export class ClipboardManager {
 
     _ensureDirectories() {
         let dir = Gio.File.new_for_path(CACHE_DIR);
-        try {
-            if (!dir.query_exists(null)) {
-                dir.make_directory_with_parents(null);
-            }
-        } catch (e) {
-           console.debug(`GClip: Error creating directory: ${e}`);
+        if (!dir.query_exists(null)) {
+            dir.make_directory_with_parents(null);
         }
     }
 
@@ -108,25 +104,20 @@ export class ClipboardManager {
         const hash = Math.abs(parseInt(this._hashBytes(data)));
         const filepath = GLib.build_filenamev([CACHE_DIR, hash.toString()]);
         
-        try {
-            let file = Gio.File.new_for_path(filepath);
-            file.replace_contents(
-                data,
-                null,
-                false,
-                Gio.FileCreateFlags.NONE,
-                null
-            );
+        let file = Gio.File.new_for_path(filepath);
+        file.replace_contents(
+            data,
+            null,
+            false,
+            Gio.FileCreateFlags.NONE,
+            null
+        );
 
-            this._addToHistory({
-                favorite: false,
-                mimetype: mimetype,
-                contents: filepath
-            });
-        } catch (e) {
-           console.debug(`GClip: Error saving image: ${e}`);
-           console.debug(`GClip: Stack: ${e.stack}`);
-        }
+        this._addToHistory({
+            favorite: false,
+            mimetype: mimetype,
+            contents: filepath
+        });
     }
 
     _addToHistory(item) {
@@ -155,29 +146,21 @@ export class ClipboardManager {
     }
 
     _deleteImageFile(path) {
-        try {
-            let file = Gio.File.new_for_path(path);
-            if (file.query_exists(null)) {
-                file.delete(null);
-            }
-        } catch (e) {
-           console.debug(`Error deleting image: ${e}`);
+        let file = Gio.File.new_for_path(path);
+        if (file.query_exists(null)) {
+            file.delete(null);
         }
     }
 
     _saveHistory() {
-        try {
-            let file = Gio.File.new_for_path(HISTORY_FILE);
-            file.replace_contents(
-                JSON.stringify(this._history, null, 2),
-                null,
-                false,
-                Gio.FileCreateFlags.NONE,
-                null
-            );
-        } catch (e) {
-           console.debug(`Error saving history: ${e}`);
-        }
+        let file = Gio.File.new_for_path(HISTORY_FILE);
+        file.replace_contents(
+            JSON.stringify(this._history, null, 2),
+            null,
+            false,
+            Gio.FileCreateFlags.NONE,
+            null
+        );
     }
 
     _loadHistory() {
@@ -211,14 +194,10 @@ export class ClipboardManager {
         if (item.mimetype === 'text/plain;charset=utf-8') {
             this._clipboard.set_text(St.ClipboardType.CLIPBOARD, item.contents);
         } else if (item.mimetype && item.mimetype.startsWith('image/')) {
-            try {
-                let file = Gio.File.new_for_path(item.contents);
-                let [success, bytes] = file.load_contents(null);
-                if (success) {
-                    this._clipboard.set_content(St.ClipboardType.CLIPBOARD, item.mimetype, bytes);
-                }
-            } catch (e) {
-               console.debug(`GClip: Error copying image: ${e}`);
+            let file = Gio.File.new_for_path(item.contents);
+            let [success, bytes] = file.load_contents(null);
+            if (success) {
+                this._clipboard.set_content(St.ClipboardType.CLIPBOARD, item.mimetype, bytes);
             }
         }
     }

@@ -436,11 +436,7 @@ class ClipboardPopup extends St.Widget {
             duration: 100,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
             onComplete: () => {
-                try {
-                    Main.layoutManager.removeChrome(this);
-                } catch(e) {
-                    // Ya fue removido
-                }
+                Main.layoutManager.removeChrome(this);
             }
         });
     }
