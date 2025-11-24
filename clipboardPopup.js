@@ -264,7 +264,7 @@ class ClipboardPopup extends St.Widget {
 
             return imageWidget;
         } catch (e) {
-            log(`Error creating thumbnail: ${e}`);
+           console.debug(`Error creating thumbnail: ${e}`);
             return null;
         }
     }

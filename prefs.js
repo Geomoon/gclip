@@ -88,7 +88,7 @@ export default class GClipPreferences extends ExtensionPreferences {
             dialog.connect('response', (dialog, response) => {
                 if (response === Gtk.ResponseType.YES) {
                     // TODO: Implementar limpieza
-                    log('Clearing clipboard history...');
+                   console.debug('Clearing clipboard history...');
                 }
                 dialog.destroy();
             });

@@ -32,7 +32,7 @@ export class ClipboardManager {
                 dir.make_directory_with_parents(null);
             }
         } catch (e) {
-            log(`GClip: Error creating directory: ${e}`);
+           console.debug(`GClip: Error creating directory: ${e}`);
         }
     }
 
@@ -45,13 +45,13 @@ export class ClipboardManager {
             (selection, selectionType, selectionSource) => {
                 // Solo procesar eventos del CLIPBOARD (no PRIMARY)
                 if (selectionType === Meta.SelectionType.SELECTION_CLIPBOARD) {
-                    log('GClip: Clipboard owner changed, checking content...');
+                   console.debug('GClip: Clipboard owner changed, checking content...');
                     this._checkClipboard();
                 }
             }
         );
         
-        log('GClip: Started monitoring clipboard with owner-changed event');
+       console.debug('GClip: Started monitoring clipboard with owner-changed event');
     }
 
     _checkClipboard() {
@@ -124,8 +124,8 @@ export class ClipboardManager {
                 contents: filepath
             });
         } catch (e) {
-            log(`GClip: Error saving image: ${e}`);
-            log(`GClip: Stack: ${e.stack}`);
+           console.debug(`GClip: Error saving image: ${e}`);
+           console.debug(`GClip: Stack: ${e.stack}`);
         }
     }
 
@@ -161,7 +161,7 @@ export class ClipboardManager {
                 file.delete(null);
             }
         } catch (e) {
-            log(`Error deleting image: ${e}`);
+           console.debug(`Error deleting image: ${e}`);
         }
     }
 
@@ -176,7 +176,7 @@ export class ClipboardManager {
                 null
             );
         } catch (e) {
-            log(`Error saving history: ${e}`);
+           console.debug(`Error saving history: ${e}`);
         }
     }
 
@@ -198,7 +198,7 @@ export class ClipboardManager {
                 }
             }
         } catch (e) {
-            log(`GClip: Error loading history: ${e}`);
+           console.debug(`GClip: Error loading history: ${e}`);
             this._history = [];
         }
     }
@@ -218,7 +218,7 @@ export class ClipboardManager {
                     this._clipboard.set_content(St.ClipboardType.CLIPBOARD, item.mimetype, bytes);
                 }
             } catch (e) {
-                log(`GClip: Error copying image: ${e}`);
+               console.debug(`GClip: Error copying image: ${e}`);
             }
         }
     }
@@ -252,7 +252,7 @@ export class ClipboardManager {
             const selection = metaDisplay.get_selection();
             selection.disconnect(this._selectionOwnerChangedId);
             this._selectionOwnerChangedId = null;
-            log('GClip: Stopped monitoring clipboard');
+           console.debug('GClip: Stopped monitoring clipboard');
         }
     }
 }

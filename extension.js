@@ -21,7 +21,7 @@ export default class GClipExtension extends Extension {
             () => this._showPopup()
         );
         
-        log('GClip extension enabled');
+       console.debug('GClip extension enabled');
     }
 
     disable() {
@@ -39,7 +39,7 @@ export default class GClipExtension extends Extension {
         
         this._settings = null;
         
-        log('GClip extension disabled');
+       console.debug('GClip extension disabled');
     }
 
     _showPopup() {
