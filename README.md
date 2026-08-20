@@ -4,7 +4,8 @@ A lightweight clipboard manager extension for GNOME Shell with a Windows-style p
 
 ## Features
 
-<img width="1088" height="699" alt="image" src="https://github.com/user-attachments/assets/d9bba94d-b7a7-4d71-af79-f25c50eaf7b4" />
+<img width="770" height="433" alt="image" src="https://github.com/user-attachments/assets/c696446b-7722-4135-8d45-c2b1093ff4f8" />
+
 
 - 📋 **Text & Image Support**: Manages both text and image clipboard history
 - ⚡ **Quick Access**: Open with `Super+Shift+V` (configurable)
