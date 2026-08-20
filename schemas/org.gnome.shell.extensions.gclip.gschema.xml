@@ -11,7 +11,7 @@
     </key>
 
     <key name="show-clipboard-popup" type="as">
-      <default>['&lt;Super&gt;v']</default>
+      <default>['&lt;Super&gt;&lt;Shift&gt;v']</default>
       <summary>Keyboard shortcut to show clipboard popup</summary>
       <description>
         Keyboard shortcut to open the clipboard history popup window

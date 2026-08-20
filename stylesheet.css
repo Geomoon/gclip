@@ -24,6 +24,29 @@
     background-color: rgba(60, 60, 60, 0.9);
 }
 
+/* Tab Bar */
+.gclip-tab-bar {
+    margin-bottom: 6px;
+    spacing: 0px;
+}
+
+.gclip-tab {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 9pt;
+    padding: 4px 0;
+    text-align: center;
+    border-bottom: 2px solid transparent;
+}
+
+.gclip-tab:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.gclip-tab.active {
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom: 2px solid rgba(53, 132, 228, 0.9);
+}
+
 /* Scroll View */
 .gclip-scroll-view {
     background-color: transparent;

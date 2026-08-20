@@ -121,28 +121,41 @@ export class ClipboardManager {
     }
 
     _addToHistory(item) {
-        // Buscar si el item ya existe (por contenido)
-        const existingIndex = this._history.findIndex(h => h.contents === item.contents);
-        
+        // Solo buscar duplicados entre items no marcados (los marcadores son permanentes)
+        const existingIndex = this._history.findIndex(h => !h.favorite && h.contents === item.contents);
+
         if (existingIndex !== -1) {
-            // Si existe, removerlo para re-agregarlo al inicio
-            const existing = this._history.splice(existingIndex, 1)[0];
-            // Preservar el estado de favorito si existía
-            item.favorite = existing.favorite;
+            this._history.splice(existingIndex, 1);
         }
 
         // Agregar al inicio
         this._history.unshift(item);
-        
-        // Mantener límite y limpiar archivos viejos
-        while (this._history.length > this._maxItems) {
-            const removed = this._history.pop();
+
+        // El límite solo aplica a items no marcados
+        while (this._history.filter(i => !i.favorite).length > this._maxItems) {
+            const idx = [...this._history].reverse().findIndex(i => !i.favorite);
+            const realIdx = this._history.length - 1 - idx;
+            const removed = this._history.splice(realIdx, 1)[0];
             if (removed.mimetype && removed.mimetype.startsWith('image/')) {
                 this._deleteImageFile(removed.contents);
             }
         }
 
         this._saveHistory();
+    }
+
+    addBookmark(index) {
+        if (index >= 0 && index < this._history.length) {
+            this._history[index].favorite = true;
+            this._saveHistory();
+        }
+    }
+
+    removeBookmark(index) {
+        if (index >= 0 && index < this._history.length) {
+            this._history[index].favorite = false;
+            this._saveHistory();
+        }
     }
 
     _deleteImageFile(path) {
@@ -244,8 +257,8 @@ export class ClipboardManager {
     deleteItem(index) {
         if (index >= 0 && index < this._history.length) {
             const item = this._history[index];
-            if (item.type === 'image') {
-                this._deleteImageFile(item.path);
+            if (item.mimetype && item.mimetype.startsWith('image/')) {
+                this._deleteImageFile(item.contents);
             }
             this._history.splice(index, 1);
             this._saveHistory();

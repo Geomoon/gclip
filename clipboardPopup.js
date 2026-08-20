@@ -22,7 +22,8 @@ class ClipboardPopup extends St.Widget {
         this._history = history;
         this._clipboardManager = clipboardManager;
         this._selectedIndex = 0;
-        this._keyboardMode = false; // Flag para saber si se está usando teclado
+        this._keyboardMode = false;
+        this._activeTab = 'recent';
 
         this._buildUI();
         this._populateList();
@@ -74,6 +75,41 @@ class ClipboardPopup extends St.Widget {
 
         mainBox.add_child(this._searchEntry);
 
+        // Tab bar
+        let tabBar = new St.BoxLayout({
+            style_class: 'gclip-tab-bar',
+            vertical: false,
+            x_expand: true
+        });
+
+        this._tabRecent = new St.Label({
+            text: 'Recientes',
+            style_class: 'gclip-tab active',
+            x_expand: true,
+            reactive: true,
+            track_hover: true
+        });
+        this._tabBookmarks = new St.Label({
+            text: 'Marcadores',
+            style_class: 'gclip-tab',
+            x_expand: true,
+            reactive: true,
+            track_hover: true
+        });
+
+        this._tabRecent.connect('button-press-event', () => {
+            if (this._activeTab !== 'recent') this._switchTab();
+            return Clutter.EVENT_STOP;
+        });
+        this._tabBookmarks.connect('button-press-event', () => {
+            if (this._activeTab !== 'bookmarks') this._switchTab();
+            return Clutter.EVENT_STOP;
+        });
+
+        tabBar.add_child(this._tabRecent);
+        tabBar.add_child(this._tabBookmarks);
+        mainBox.add_child(tabBar);
+
         // ScrollView para la lista
         this._scrollView = new St.ScrollView({
             style_class: 'gclip-scroll-view',
@@ -92,7 +128,7 @@ class ClipboardPopup extends St.Widget {
 
         // Footer con instrucciones
         let footer = new St.Label({
-            text: '↑↓: Navigate  |  Enter: Select  |  Del: Delete  |  Esc: Close',
+            text: '↑↓ Nav  |  ←→ Tab  |  Enter Sel  |  Ctrl+B Marcar  |  Del  |  Esc',
             style_class: 'gclip-footer'
         });
         mainBox.add_child(footer);
@@ -126,21 +162,32 @@ class ClipboardPopup extends St.Widget {
         return Clutter.EVENT_PROPAGATE;
     }
 
+    _getDisplayItems() {
+        return this._history
+            .map((item, index) => ({ item, index }))
+            .filter(({ item }) => this._activeTab === 'recent' ? !item.favorite : !!item.favorite);
+    }
+
     _populateList() {
         this._listBox.destroy_all_children();
         this._items = [];
 
-        if (this._history.length === 0) {
+        const displayItems = this._getDisplayItems();
+
+        if (displayItems.length === 0) {
+            const msg = this._activeTab === 'recent'
+                ? 'No clipboard history yet'
+                : 'No hay marcadores aún  (Ctrl+B para marcar)';
             let emptyLabel = new St.Label({
-                text: 'No clipboard history yet',
+                text: msg,
                 style_class: 'gclip-empty-label'
             });
             this._listBox.add_child(emptyLabel);
             return;
         }
 
-        this._history.forEach((item, index) => {
-            let itemWidget = this._createItemWidget(item, index);
+        displayItems.forEach(({ item, index }, displayPos) => {
+            let itemWidget = this._createItemWidget(item, index, displayPos);
             this._listBox.add_child(itemWidget);
             this._items.push(itemWidget);
         });
@@ -148,7 +195,7 @@ class ClipboardPopup extends St.Widget {
         this._updateSelection();
     }
 
-    _createItemWidget(item, index) {
+    _createItemWidget(item, index, displayIndex = index) {
         let itemBox = new St.BoxLayout({
             style_class: 'gclip-item',
             vertical: false,
@@ -159,7 +206,7 @@ class ClipboardPopup extends St.Widget {
 
         // Índice del item
         let indexLabel = new St.Label({
-            text: `${index + 1}`,
+            text: `${displayIndex + 1}`,
             style_class: 'gclip-item-index'
         });
         itemBox.add_child(indexLabel);
@@ -202,16 +249,20 @@ class ClipboardPopup extends St.Widget {
             itemBox.add_child(label);
         }
 
+        // Store original history index on the widget
+        itemBox._historyIndex = index;
+
         // Event handlers
         itemBox.connect('button-press-event', () => {
-            this._selectItem(index);
+            this._selectedIndex = this._items.indexOf(itemBox);
+            this._selectItem(itemBox._historyIndex);
             return Clutter.EVENT_STOP;
         });
 
         itemBox.connect('enter-event', () => {
             // Desactivar modo teclado cuando el mouse se mueve
             this._keyboardMode = false;
-            this._selectedIndex = index;
+            this._selectedIndex = this._items.indexOf(itemBox);
             this._updateSelection();
         });
         
@@ -285,7 +336,7 @@ class ClipboardPopup extends St.Widget {
 
     _filterList() {
         const searchText = this._searchEntry.get_text().toLowerCase();
-        
+
         if (!searchText) {
             this._populateList();
             return;
@@ -294,11 +345,11 @@ class ClipboardPopup extends St.Widget {
         this._listBox.destroy_all_children();
         this._items = [];
 
-        const filtered = this._history.filter((item, index) => {
+        const filtered = this._getDisplayItems().filter(({ item }) => {
             if (item.mimetype === 'text/plain;charset=utf-8') {
                 return item.contents.toLowerCase().includes(searchText);
             }
-            return false; // Por ahora no filtramos imágenes
+            return false;
         });
 
         if (filtered.length === 0) {
@@ -310,15 +361,32 @@ class ClipboardPopup extends St.Widget {
             return;
         }
 
-        filtered.forEach((item, index) => {
-            const originalIndex = this._history.indexOf(item);
-            let itemWidget = this._createItemWidget(item, originalIndex);
+        filtered.forEach(({ item, index }, displayPos) => {
+            let itemWidget = this._createItemWidget(item, index, displayPos);
             this._listBox.add_child(itemWidget);
             this._items.push(itemWidget);
         });
 
         this._selectedIndex = 0;
         this._updateSelection();
+    }
+
+    _switchTab() {
+        this._activeTab = this._activeTab === 'recent' ? 'bookmarks' : 'recent';
+        this._selectedIndex = 0;
+        this._searchEntry.set_text('');
+        this._updateTabBar();
+        this._populateList();
+    }
+
+    _updateTabBar() {
+        if (this._activeTab === 'recent') {
+            this._tabRecent.add_style_class_name('active');
+            this._tabBookmarks.remove_style_class_name('active');
+        } else {
+            this._tabBookmarks.add_style_class_name('active');
+            this._tabRecent.remove_style_class_name('active');
+        }
     }
 
     _updateSelection() {
@@ -361,6 +429,8 @@ class ClipboardPopup extends St.Widget {
 
     _onKeyPress(event) {
         const symbol = event.get_key_symbol();
+        const state = event.get_state();
+        const ctrl = (state & Clutter.ModifierType.CONTROL_MASK) !== 0;
 
         if (symbol === Clutter.KEY_Up) {
             this._keyboardMode = true;
@@ -376,13 +446,35 @@ class ClipboardPopup extends St.Widget {
             return Clutter.EVENT_STOP;
         }
 
+        if (symbol === Clutter.KEY_Left || symbol === Clutter.KEY_Right) {
+            this._keyboardMode = true;
+            this._switchTab();
+            return Clutter.EVENT_STOP;
+        }
+
         if (symbol === Clutter.KEY_Return || symbol === Clutter.KEY_KP_Enter) {
-            this._selectItem(this._selectedIndex);
+            const item = this._items[this._selectedIndex];
+            if (item) this._selectItem(item._historyIndex);
             return Clutter.EVENT_STOP;
         }
 
         if (symbol === Clutter.KEY_Delete || symbol === Clutter.KEY_KP_Delete) {
-            this._deleteItem(this._selectedIndex);
+            const item = this._items[this._selectedIndex];
+            if (item) this._deleteItem(item._historyIndex);
+            return Clutter.EVENT_STOP;
+        }
+
+        if (ctrl && (symbol === Clutter.KEY_b || symbol === Clutter.KEY_B)) {
+            const item = this._items[this._selectedIndex];
+            if (item) {
+                if (this._activeTab === 'recent') {
+                    this._clipboardManager.addBookmark(item._historyIndex);
+                } else {
+                    this._clipboardManager.removeBookmark(item._historyIndex);
+                }
+                this._selectedIndex = 0;
+                this._populateList();
+            }
             return Clutter.EVENT_STOP;
         }
 
@@ -403,12 +495,17 @@ class ClipboardPopup extends St.Widget {
     }
 
     _deleteItem(index) {
-        if (index >= 0 && index < this._history.length) {
+        if (index < 0 || index >= this._history.length) return;
+
+        if (this._activeTab === 'bookmarks') {
+            this._clipboardManager.removeBookmark(index);
+        } else {
             this._clipboardManager.deleteItem(index);
             this._history.splice(index, 1);
-            this._populateList();
-            this._selectedIndex = Math.min(this._selectedIndex, this._history.length - 1);
         }
+
+        this._selectedIndex = Math.max(0, this._selectedIndex - 1);
+        this._populateList();
     }
 
     open() {
