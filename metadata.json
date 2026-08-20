@@ -10,5 +10,8 @@
   ],
   "url": "https://github.com/Geomoon/gclip",
   "version": 3,
-  "settings-schema": "org.gnome.shell.extensions.gclip"
+  "settings-schema": "org.gnome.shell.extensions.gclip",
+  "donations": {
+    "kofi": "geovlunaa"
+  }
 }
