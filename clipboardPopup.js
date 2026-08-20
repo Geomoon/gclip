@@ -501,7 +501,6 @@ class ClipboardPopup extends St.Widget {
             this._clipboardManager.removeBookmark(index);
         } else {
             this._clipboardManager.deleteItem(index);
-            this._history.splice(index, 1);
         }
 
         this._selectedIndex = Math.max(0, this._selectedIndex - 1);
