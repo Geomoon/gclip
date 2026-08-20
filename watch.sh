@@ -2,7 +2,7 @@
 
 # Script para auto-recargar la extensión cuando detecta cambios
 
-EXT_DIR="$HOME/.local/share/gnome-shell/extensions/gclip@usuario.dev"
+EXT_DIR="$HOME/.local/share/gnome-shell/extensions/gclip@Geomoon.dev"
 DEV_DIR="$(pwd)"
 
 echo "👀 Watching for changes in $DEV_DIR"
@@ -27,9 +27,9 @@ reload_extension() {
     fi
     
     # Recargar extensión
-    gnome-extensions disable gclip@usuario.dev 2>/dev/null
+    gnome-extensions disable gclip@Geomoon.dev 2>/dev/null
     sleep 0.3
-    gnome-extensions enable gclip@usuario.dev
+    gnome-extensions enable gclip@Geomoon.dev
     
     echo "✅ Reloaded! Test with Super+V"
 }

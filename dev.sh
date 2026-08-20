@@ -3,7 +3,7 @@
 # Script de desarrollo para GClip
 # Sincroniza cambios y recarga la extensión automáticamente
 
-EXT_DIR="$HOME/.local/share/gnome-shell/extensions/gclip@usuario.dev"
+EXT_DIR="$HOME/.local/share/gnome-shell/extensions/gclip@Geomoon.dev"
 DEV_DIR="$(pwd)"
 
 echo "🔄 Syncing files to extension directory..."
@@ -20,9 +20,9 @@ echo "📦 Recompiling schemas..."
 glib-compile-schemas "$EXT_DIR/schemas/"
 
 echo "🔄 Reloading extension..."
-gnome-extensions disable gclip@usuario.dev 2>/dev/null
+gnome-extensions disable gclip@Geomoon.dev 2>/dev/null
 sleep 0.5
-gnome-extensions enable gclip@usuario.dev
+gnome-extensions enable gclip@Geomoon.dev
 
 echo "✅ Extension reloaded! Press Super+V to test"
 echo "📋 Watching logs (Ctrl+C to stop):"

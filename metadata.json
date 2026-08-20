@@ -4,9 +4,11 @@
   "uuid": "gclip@Geomoon.dev",
   "shell-version": [
     "45",
-    "46"
+    "46",
+    "47",
+    "48"
   ],
   "url": "https://github.com/Geomoon/gclip",
-  "version": 1,
+  "version": 2,
   "settings-schema": "org.gnome.shell.extensions.gclip"
 }
