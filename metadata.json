@@ -6,10 +6,12 @@
     "45",
     "46",
     "47",
-    "48"
+    "48",
+    "49",
+    "50"
   ],
   "url": "https://github.com/Geomoon/gclip",
-  "version": 3,
+  "version": 5,
   "settings-schema": "org.gnome.shell.extensions.gclip",
   "donations": {
     "kofi": "geovlunaa"

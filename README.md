@@ -12,9 +12,10 @@ A lightweight clipboard manager extension for GNOME Shell with a Windows-style p
 - 🔍 **Search**: Filter clipboard history with fuzzy search
 - 💾 **Persistent Storage**: Keeps history across sessions
 - 🖼️ **Image Management**: Automatically saves and manages clipboard images
-- 🎨 **Clean UI**: Modern, dark-themed popup interface
+- 🎨 **Clean UI**: Compact popup that follows the GNOME Shell theme, with light, dark and darker themes
 - ⌨️ **Keyboard Navigation**: Full keyboard control (arrow keys, Enter, Delete, Esc)
-- 📌 **Marcadores**: Pin items permanently outside the history limit
+- 📌 **Bookmarks**: Pin items permanently outside the history limit
+- 🔒 **Private mode**: Pause history recording while you copy sensitive data
 
 ## Installation
 
@@ -49,20 +50,30 @@ A lightweight clipboard manager extension for GNOME Shell with a Windows-style p
 4. **Select Item**: Press Enter or click to copy to clipboard
 5. **Delete Item**: Press Delete key
 6. **Search**: Start typing to filter items
-7. **Bookmark Item**: Press `Ctrl+B` to pin an item to Marcadores
+7. **Bookmark Item**: Press `Ctrl+B` to pin an item to Bookmarks
 8. **Close**: Press Esc or click outside
 
-### Marcadores (Bookmarks)
+### Bookmarks
 
-The **Marcadores** tab lets you pin items permanently so they're always accessible, regardless of the history limit.
+The **Bookmarks** tab lets you pin items permanently so they're always accessible, regardless of the history limit.
 
 | Action | Result |
 |--------|--------|
-| `Ctrl+B` on Recientes | Pins the item to Marcadores |
-| `Ctrl+B` on Marcadores | Unpins the item (returns to Recientes) |
-| `Delete` on Marcadores | Removes the pin (item stays in Recientes) |
-| `Enter` / click on Marcadores | Copies to clipboard and adds a copy to Recientes |
+| `Ctrl+B` on Recent | Pins the item to Bookmarks |
+| `Ctrl+B` on Bookmarks | Unpins the item (returns to Recent) |
+| `Delete` on Bookmarks | Removes the pin (item stays in Recent) |
+| `Enter` / click on Bookmarks | Copies to clipboard and adds a copy to Recent |
 | `←` / `→` or mouse click | Switch between tabs |
+
+### Private Mode
+
+While private mode is on, GClip does not read or save anything you copy. The item list is hidden in the popup while it is active, and the setting persists across sessions.
+
+| Action | Result |
+|--------|--------|
+| `Ctrl+P` in the popup, or click the switch in the footer | Toggles private mode |
+| Preferences → **Private Mode** | Toggles private mode |
+| Global shortcut (unset by default) | Toggles private mode from anywhere |
 
 ## File Structure
 
@@ -95,7 +106,11 @@ gnome-extensions prefs gclip@Geomoon.dev
 Settings:
 - **Max History Items**: Number of recent items to keep (default: 100). Bookmarked items are not affected by this limit.
 - **Keyboard Shortcut**: Change the keybinding (default: `Super+Shift+V`). Click "Change" and press your desired combination.
+- **Private Mode**: Switch to stop recording, plus an optional global shortcut to toggle it. In the shortcut dialog, `Backspace` clears the shortcut.
+- **Popup Theme**: Follow System (default), Light, Dark, or Darker (the dark theme with GClip's original, darker backgrounds).
 - **Clear History**: Delete all saved clipboard data
+
+The gear button at the end of the popup's footer opens these preferences.
 
 ## Requirements
 
@@ -131,6 +146,16 @@ journalctl -f -o cat /usr/bin/gnome-shell
 - Ensure disk space is available
 
 ## Changelog
+
+### v3
+- **Private mode**: pause history recording from the popup (`Ctrl+P` or the footer switch), the preferences, or an optional global shortcut
+- Redesigned popup that follows the GNOME Shell theme (light/dark style and accent color), with a compact layout
+- **Popup Theme** setting: Follow System, Light, Dark, or Darker
+- Bookmark and delete buttons on each item when hovering it
+- Search entry with clear button, empty-state placeholders, and shortcut hints in the footer
+- Settings button moved to the popup footer
+- Popup text unified to English
+- Added GNOME Shell 49 and 50 support
 
 ### v2
 - Added **Marcadores** tab for permanently pinned items

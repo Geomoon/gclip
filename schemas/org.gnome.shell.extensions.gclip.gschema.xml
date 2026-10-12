@@ -18,5 +18,35 @@
       </description>
     </key>
 
+    <key name="private-mode" type="b">
+      <default>false</default>
+      <summary>Private mode</summary>
+      <description>
+        While enabled, nothing copied to the clipboard is saved to the history
+      </description>
+    </key>
+
+    <key name="toggle-private-mode" type="as">
+      <default>[]</default>
+      <summary>Keyboard shortcut to toggle private mode</summary>
+      <description>
+        Keyboard shortcut to turn private mode on or off (unset by default)
+      </description>
+    </key>
+
+    <key name="popup-theme" type="s">
+      <choices>
+        <choice value="system"/>
+        <choice value="light"/>
+        <choice value="dark"/>
+        <choice value="darker"/>
+      </choices>
+      <default>'system'</default>
+      <summary>Popup theme</summary>
+      <description>
+        Color theme of the clipboard popup: follow the system style, light, dark, or a darker custom variant
+      </description>
+    </key>
+
   </schema>
 </schemalist>

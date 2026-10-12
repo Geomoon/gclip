@@ -1,117 +1,329 @@
 /* GClip Extension Stylesheet */
 
+/* Fondo, borde, sombra, filas, entrada y botones vienen del tema del Shell
+   (popup-menu-content, popup-menu-item, button, icon-button, toggle-switch), así que siguen
+   el estilo claro/oscuro. Aquí va el layout, en versión compacta, y al final
+   las paletas de los temas forzados (Light, Dark, Darker). */
+
 .gclip-popup {
-    background-color: rgba(25, 25, 25, 0.98);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 12px;
-    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.3);
+    padding: 10px;
 }
 
-/* Search Entry */
-.gclip-search-entry {
-    background-color: rgba(50, 50, 50, 0.8);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 10pt;
-    color: #ffffff;
-    margin-bottom: 8px;
-}
-
-.gclip-search-entry:focus {
-    border-color: rgba(53, 132, 228, 0.8);
-    background-color: rgba(60, 60, 60, 0.9);
-}
-
-/* Tab Bar */
-.gclip-tab-bar {
+/* Search */
+.gclip-search-row {
+    spacing: 6px;
     margin-bottom: 6px;
-    spacing: 0px;
 }
 
-.gclip-tab {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 9pt;
-    padding: 4px 0;
-    text-align: center;
-    border-bottom: 2px solid transparent;
+.gclip-popup .gclip-search-entry {
+    padding: 5px 8px;
+    min-height: 0;
 }
 
-.gclip-tab:hover {
-    color: rgba(255, 255, 255, 0.7);
+.gclip-entry-icon {
+    icon-size: 14px;
+    padding: 0 4px;
 }
 
-.gclip-tab.active {
-    color: rgba(255, 255, 255, 0.9);
-    border-bottom: 2px solid rgba(53, 132, 228, 0.9);
-}
-
-/* Scroll View */
-.gclip-scroll-view {
-    background-color: transparent;
-}
-
-.gclip-list-box {
+/* View switcher */
+.gclip-tab-bar {
     spacing: 4px;
+    margin-bottom: 6px;
 }
 
-/* Clipboard Items */
-.gclip-item {
-    background-color: rgba(50, 50, 50, 0.4);
-    border-radius: 5px;
-    padding: 8px 10px;
-    margin: 2px 0;
-    transition-duration: 0ms;
+.gclip-popup .gclip-tab {
+    padding: 3px 12px;
+    min-height: 0;
 }
 
-.gclip-item:hover {
-    background-color: rgba(70, 70, 70, 0.7);
+/* List */
+.gclip-list-box {
+    spacing: 2px;
 }
 
-.gclip-item.selected {
-    background-color: rgba(53, 132, 228, 0.5);
+.gclip-popup .gclip-item {
+    padding: 6px 10px;
+    spacing: 8px;
 }
 
 .gclip-item-index {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 8pt;
-    font-weight: bold;
-    min-width: 25px;
+    font-size: 0.85em;
+    min-width: 1.6em;
+    text-align: right;
 }
 
-.gclip-item-icon {
-    color: rgba(255, 255, 255, 0.7);
+.gclip-item-actions {
+    spacing: 2px;
+}
+
+.gclip-item-action {
+    padding: 3px;
+    border-radius: 999px;
+}
+
+.gclip-item-action:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.gclip-item-action-icon {
+    icon-size: 14px;
 }
 
 .gclip-item-thumbnail {
     border-radius: 4px;
-    margin-right: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.gclip-item-text {
-    color: #ffffff;
-    font-size: 9pt;
+/* Empty state */
+.gclip-placeholder {
+    spacing: 4px;
+    padding: 32px 20px 16px 20px;
 }
 
-.gclip-item-time {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 8pt;
+.gclip-placeholder-icon {
+    icon-size: 40px;
+    margin-bottom: 4px;
 }
 
-/* Empty State */
-.gclip-empty-label {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12pt;
-    padding: 40px;
+.gclip-placeholder-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.gclip-placeholder-description {
+    text-align: center;
 }
 
 /* Footer */
 .gclip-footer {
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 8pt;
-    padding: 6px 0 0 0;
-    margin-top: 4px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 6px;
+    spacing: 8px;
+}
+
+.gclip-private-box {
+    spacing: 6px;
+}
+
+/* Interruptor nativo en tamaño reducido */
+.gclip-popup .toggle-switch {
+    width: 32px;
+}
+
+.gclip-popup .toggle-switch .handle {
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+}
+
+.gclip-popup .toggle-switch StIcon {
+    icon-size: 10px;
+}
+
+.gclip-footer-icon {
+    icon-size: 14px;
+}
+
+.gclip-popup .gclip-settings-button {
+    padding: 6px;
+    min-height: 0;
+}
+
+.gclip-hints {
+    spacing: 12px;
+    font-size: 0.85em;
+}
+
+.gclip-hint {
+    spacing: 5px;
+}
+
+.gclip-keycap {
+    padding: 1px 5px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Texto e iconos secundarios */
+.gclip-dim {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Fondos claros (estilo claro del Shell o tema Light) */
+.gclip-light .gclip-keycap {
+    border-color: rgba(0, 0, 0, 0.15);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.gclip-light .gclip-item-action:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.gclip-light .gclip-dim {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Tema Dark */
+.gclip-popup.gclip-theme-dark {
+    background-color: #36363a;
+    border: 1px solid #424247;
+    color: #ffffff;
+}
+
+.gclip-theme-dark .gclip-search-entry,
+.gclip-theme-dark .gclip-search-entry:focus {
+    background-color: #48484c;
+    color: #ffffff;
+}
+
+.gclip-theme-dark .gclip-search-entry:hover {
+    background-color: #525256;
+    color: #ffffff;
+}
+
+.gclip-theme-dark .gclip-search-entry StLabel.hint-text {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.gclip-theme-dark .gclip-tab,
+.gclip-theme-dark .gclip-settings-button {
+    background-color: transparent;
+    color: #ffffff;
+}
+
+.gclip-theme-dark .gclip-tab:hover,
+.gclip-theme-dark .gclip-settings-button:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.gclip-theme-dark .gclip-tab:checked,
+.gclip-theme-dark .gclip-tab:active,
+.gclip-theme-dark .gclip-settings-button:active {
+    background-color: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+.gclip-theme-dark .gclip-tab:checked:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.gclip-theme-dark .gclip-item {
+    color: #ffffff;
+}
+
+/* !important: algunos temas (Yaru) fijan así el fondo de la fila seleccionada */
+.gclip-theme-dark .gclip-item:selected {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff;
+}
+
+.gclip-theme-dark .toggle-switch {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Acento del sistema (GNOME 47+), con el naranja de GNOME como fallback */
+.gclip-theme-dark .toggle-switch:checked {
+    background-color: #ed5b00;
+    background-color: -st-accent-color;
+}
+
+.gclip-theme-dark .vhandle {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.gclip-theme-dark .vhandle:hover,
+.gclip-theme-dark .vhandle:active {
+    background-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Tema Light */
+.gclip-popup.gclip-theme-light {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #222222;
+}
+
+.gclip-theme-light .gclip-search-entry,
+.gclip-theme-light .gclip-search-entry:focus {
+    background-color: #e5e5e5;
+    color: #222222;
+}
+
+.gclip-theme-light .gclip-search-entry:hover {
+    background-color: #dbdbdb;
+    color: #222222;
+}
+
+.gclip-theme-light .gclip-search-entry StLabel.hint-text {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.gclip-theme-light .gclip-tab,
+.gclip-theme-light .gclip-settings-button {
+    background-color: transparent;
+    color: #222222;
+}
+
+.gclip-theme-light .gclip-tab:hover,
+.gclip-theme-light .gclip-settings-button:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #222222;
+}
+
+.gclip-theme-light .gclip-tab:checked,
+.gclip-theme-light .gclip-tab:active,
+.gclip-theme-light .gclip-settings-button:active {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #222222;
+}
+
+.gclip-theme-light .gclip-tab:checked:hover {
+    background-color: rgba(0, 0, 0, 0.14);
+    color: #222222;
+}
+
+.gclip-theme-light .gclip-item {
+    color: #222222;
+}
+
+/* !important: algunos temas (Yaru) fijan así el fondo de la fila seleccionada */
+.gclip-theme-light .gclip-item:selected {
+    background-color: rgba(0, 0, 0, 0.08) !important;
+    color: #222222;
+}
+
+.gclip-theme-light .toggle-switch {
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Acento del sistema (GNOME 47+), con el naranja de GNOME como fallback */
+.gclip-theme-light .toggle-switch:checked {
+    background-color: #ed5b00;
+    background-color: -st-accent-color;
+}
+
+.gclip-theme-light .vhandle {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.gclip-theme-light .vhandle:hover,
+.gclip-theme-light .vhandle:active {
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+/* Tema Darker: el tema Dark con los fondos originales de GClip */
+.gclip-popup.gclip-theme-darker {
+    background-color: rgba(25, 25, 25, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.gclip-theme-darker .gclip-search-entry {
+    background-color: rgba(50, 50, 50, 0.8);
+}
+
+.gclip-theme-darker .gclip-search-entry:hover,
+.gclip-theme-darker .gclip-search-entry:focus {
+    background-color: rgba(60, 60, 60, 0.9);
 }

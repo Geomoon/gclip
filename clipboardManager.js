@@ -41,6 +41,10 @@ export class ClipboardManager {
             (selection, selectionType, selectionSource) => {
                 // Solo procesar eventos del CLIPBOARD (no PRIMARY)
                 if (selectionType === Meta.SelectionType.SELECTION_CLIPBOARD) {
+                    // En modo privado no se lee ni se guarda nada
+                    if (this._settings.get_boolean('private-mode'))
+                        return;
+
                    console.debug('GClip: Clipboard owner changed, checking content...');
                     this._checkClipboard();
                 }
