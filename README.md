@@ -9,22 +9,27 @@ A lightweight clipboard manager extension for GNOME Shell with a Windows-style p
 
 - 📋 **Text & Image Support**: Manages both text and image clipboard history
 - ⚡ **Quick Access**: Open with `Super+Shift+V` (configurable)
-- 🔍 **Search**: Filter clipboard history with fuzzy search
+- 🔍 **Search**: Filter text items as you type
 - 💾 **Persistent Storage**: Keeps history across sessions
 - 🖼️ **Image Management**: Automatically saves and manages clipboard images
-- 🎨 **Clean UI**: Compact popup that follows the GNOME Shell theme, with light, dark and darker themes
+- 🎨 **Native Look**: Compact popup that follows the GNOME Shell theme and accent color, with optional Light, Dark and Darker themes
 - ⌨️ **Keyboard Navigation**: Full keyboard control (arrow keys, Enter, Delete, Esc)
+- 🖱️ **Item Actions**: Bookmark and delete buttons appear when hovering an item
 - 📌 **Bookmarks**: Pin items permanently outside the history limit
 - 🔒 **Private mode**: Pause history recording while you copy sensitive data
 
 ## Installation
+
+### From GNOME Extensions
+
+Install it from [extensions.gnome.org](https://extensions.gnome.org/extension/8891/gclip/).
 
 ### From Source
 
 1. Clone this repository:
    ```bash
    cd ~/.local/share/gnome-shell/extensions/
-   git clone <repository-url> gclip@Geomoon.dev
+   git clone https://github.com/Geomoon/gclip.git gclip@Geomoon.dev
    ```
 
 2. Compile the GSettings schema:
@@ -44,14 +49,22 @@ A lightweight clipboard manager extension for GNOME Shell with a Windows-style p
 
 ## Usage
 
-1. **Open Clipboard History**: Press `Super+Shift+V`
-2. **Navigate**: Use arrow keys (↑/↓) or mouse hover
-3. **Switch Tabs**: Use arrow keys (←/→) or click the tab with the mouse
-4. **Select Item**: Press Enter or click to copy to clipboard
-5. **Delete Item**: Press Delete key
-6. **Search**: Start typing to filter items
-7. **Bookmark Item**: Press `Ctrl+B` to pin an item to Bookmarks
-8. **Close**: Press Esc or click outside
+Press `Super+Shift+V` to open the popup at the pointer position. Start typing to search, pick an item to copy it to the clipboard, and the popup closes.
+
+| Action | Keyboard | Mouse |
+|--------|----------|-------|
+| Open the popup | `Super+Shift+V` (configurable) | – |
+| Move through the list | `↑` / `↓` | Hover an item |
+| Copy an item | `Enter` | Click the item |
+| Switch between Recent and Bookmarks | `←` / `→` | Click the tab |
+| Bookmark / remove bookmark | `Ctrl+B` | Bookmark button on the hovered item |
+| Delete an item | `Delete` | Trash button on the hovered item |
+| Search | Type in the search entry | Clear button in the entry |
+| Toggle private mode | `Ctrl+P` | Switch in the footer |
+| Open preferences | – | Gear button in the footer |
+| Close | `Esc` | Click outside the popup |
+
+Search matches text items only; images are hidden while a search is active.
 
 ### Bookmarks
 
@@ -63,7 +76,8 @@ The **Bookmarks** tab lets you pin items permanently so they're always accessibl
 | `Ctrl+B` on Bookmarks | Unpins the item (returns to Recent) |
 | `Delete` on Bookmarks | Removes the pin (item stays in Recent) |
 | `Enter` / click on Bookmarks | Copies to clipboard and adds a copy to Recent |
-| `←` / `→` or mouse click | Switch between tabs |
+
+The bookmark and trash buttons shown on a hovered item do the same as `Ctrl+B` and `Delete`.
 
 ### Private Mode
 
@@ -84,9 +98,11 @@ gclip@Geomoon.dev/
 ├── clipboardPopup.js     # UI popup window with tabs, search and navigation
 ├── prefs.js             # Settings/preferences UI
 ├── metadata.json        # Extension metadata and version info
-├── stylesheet.css       # Popup styling and theming
+├── stylesheet.css       # Popup layout and the Light/Dark/Darker palettes
 ├── schemas/             # GSettings configuration schemas
 │   └── org.gnome.shell.extensions.gclip.gschema.xml
+├── dev.sh               # Development: sync to the extensions folder and reload
+├── watch.sh             # Development: reload automatically on file changes
 └── README.md           # This file
 ```
 
@@ -104,17 +120,21 @@ gnome-extensions prefs gclip@Geomoon.dev
 ```
 
 Settings:
-- **Max History Items**: Number of recent items to keep (default: 100). Bookmarked items are not affected by this limit.
-- **Keyboard Shortcut**: Change the keybinding (default: `Super+Shift+V`). Click "Change" and press your desired combination.
-- **Private Mode**: Switch to stop recording, plus an optional global shortcut to toggle it. In the shortcut dialog, `Backspace` clears the shortcut.
-- **Popup Theme**: Follow System (default), Light, Dark, or Darker (the dark theme with GClip's original, darker backgrounds).
-- **Clear History**: Delete all saved clipboard data
+- **Maximum History Items**: Number of recent items to keep (default: 100). Bookmarked items are not affected by this limit.
+- **Private Mode**: Stop recording what you copy.
+- **Popup Theme**: Colors of the popup.
+  - *Follow System* (default): uses the GNOME Shell theme, including its light or dark style.
+  - *Light* / *Dark*: forces that palette regardless of the system style.
+  - *Darker*: the dark theme with GClip's original, darker backgrounds.
+- **Show Clipboard Popup**: Shortcut that opens the popup (default: `Super+Shift+V`). Click "Change" and press your desired combination.
+- **Toggle Private Mode**: Optional global shortcut (unset by default). In the shortcut dialog, `Backspace` clears the shortcut.
+- **Clear History**: Delete all saved clipboard data and images.
 
-The gear button at the end of the popup's footer opens these preferences.
+Theme changes apply the next time the popup is opened. The gear button in the popup's footer opens these preferences.
 
 ## Requirements
 
-- GNOME Shell 45, 46, 47, or 48
+- GNOME Shell 45 to 50
 - Wayland or X11
 
 ## Technical Details
@@ -125,6 +145,7 @@ The gear button at the end of the popup's footer opens these preferences.
 - **Monitoring**: Event-driven via `Meta.Display` selection owner-changed signal
 - **Duplicate Detection**: Content comparison for text; hash-based for images
 - **Bookmarks**: Stored as `favorite: true` in the same history JSON; excluded from the item limit
+- **Theming**: Reuses GNOME Shell theme classes for the popup, rows, buttons and switch; the forced themes override colors only
 
 ## Troubleshooting
 
@@ -138,12 +159,27 @@ journalctl -f -o cat /usr/bin/gnome-shell
 ```
 
 **Keybinding not working:**
-- Check if another extension uses the same shortcut
+- Check if another extension or a system shortcut uses the same combination. A common conflict is the notification list shortcut:
+  ```bash
+  gsettings get org.gnome.shell.keybindings toggle-message-tray
+  ```
 - Change it in extension preferences (`gnome-extensions prefs gclip@Geomoon.dev`)
+
+**Nothing is being saved:**
+- Check that private mode is off (the switch in the popup footer)
 
 **Images not saving:**
 - Check permissions on `~/.cache/gclip@Geomoon.dev/`
 - Ensure disk space is available
+
+## Development
+
+Work from a clone outside the extensions folder and use the helper scripts to install and reload:
+
+```bash
+./dev.sh     # sync files, recompile the schema, reload the extension and follow the logs
+./watch.sh   # same, automatically on every file change (needs inotify-tools)
+```
 
 ## Changelog
 
