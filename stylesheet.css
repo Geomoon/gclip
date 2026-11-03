@@ -44,6 +44,15 @@
 .gclip-popup .gclip-item {
     padding: 6px 10px;
     spacing: 8px;
+    border-radius: 6px;
+}
+
+.gclip-popup .gclip-item:selected {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.gclip-light .gclip-item:selected {
+    background-color: rgba(0, 0, 0, 0.08) !important;
 }
 
 .gclip-item-index {

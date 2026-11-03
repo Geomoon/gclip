@@ -7,7 +7,7 @@ import Shell from 'gi://Shell';
 
 const CACHE_DIR = GLib.build_filenamev([
     GLib.get_user_cache_dir(),
-    'gclip@usuario.dev'
+    'gclip@Geomoon.dev'
 ]);
 const HISTORY_FILE = GLib.build_filenamev([CACHE_DIR, 'clipboard-history.json']);
 

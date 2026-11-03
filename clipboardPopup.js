@@ -2,6 +2,7 @@ import St from 'gi://St';
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
@@ -23,6 +24,7 @@ class ClipboardPopup extends St.Widget {
         this._clipboardManager = clipboardManager;
         this._settings = settings;
         this._openPreferences = openPreferences;
+        this._targetWindow = global.display.focus_window;
         this._selectedIndex = 0;
         this._keyboardMode = false;
         this._activeTab = 'recent';
@@ -42,6 +44,13 @@ class ClipboardPopup extends St.Widget {
         // Capturar eventos globales
         this._capturedEventId = global.stage.connect('captured-event', 
             this._onCapturedEvent.bind(this));
+
+        this.connect('destroy', () => {
+            if (this._capturedEventId) {
+                global.stage.disconnect(this._capturedEventId);
+                this._capturedEventId = null;
+            }
+        });
     }
 
     _positionPopup() {
@@ -656,8 +665,48 @@ class ClipboardPopup extends St.Widget {
         if (index >= 0 && index < this._history.length) {
             const item = this._history[index];
             this._clipboardManager.copyToClipboard(item);
+            const targetWindow = this._targetWindow;
             this.close();
+            this._pasteToActiveWindow(targetWindow);
         }
+    }
+
+    _pasteToActiveWindow(targetWindow) {
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 150, () => {
+            try {
+                if (targetWindow) {
+                    try {
+                        targetWindow.focus(global.display.get_current_time());
+                        targetWindow.activate(global.display.get_current_time());
+                    } catch (winErr) {
+                        // ignore window focus quirks
+                    }
+                }
+
+                const backend = global.stage.context?.get_backend?.() ?? Clutter.get_default_backend();
+                const seat = backend?.get_default_seat();
+                if (!seat) return GLib.SOURCE_REMOVE;
+
+                const device = seat.create_virtual_device(Clutter.InputDeviceType.KEYBOARD_DEVICE);
+                if (!device) return GLib.SOURCE_REMOVE;
+
+                const pressed = Clutter.KeyState?.PRESSED ?? 0;
+                const released = Clutter.KeyState?.RELEASED ?? 1;
+
+                let eventTime = Clutter.get_current_event_time();
+                if (!eventTime || eventTime === 0) {
+                    eventTime = GLib.get_monotonic_time();
+                }
+
+                device.notify_keyval(eventTime, Clutter.KEY_Control_L, pressed);
+                device.notify_keyval(eventTime, Clutter.KEY_v, pressed);
+                device.notify_keyval(eventTime, Clutter.KEY_v, released);
+                device.notify_keyval(eventTime, Clutter.KEY_Control_L, released);
+            } catch (e) {
+                console.error('GClip: Auto-paste failed:', e);
+            }
+            return GLib.SOURCE_REMOVE;
+        });
     }
 
     _toggleBookmark(index) {
@@ -702,6 +751,8 @@ class ClipboardPopup extends St.Widget {
         if (this._closing) return;
         this._closing = true;
         
+        global.stage.set_key_focus(null);
+
         if (this._capturedEventId) {
             global.stage.disconnect(this._capturedEventId);
             this._capturedEventId = null;
@@ -715,6 +766,7 @@ class ClipboardPopup extends St.Widget {
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
             onComplete: () => {
                 Main.layoutManager.removeChrome(this);
+                this.destroy();
             }
         });
     }
