@@ -38,24 +38,24 @@ Install it from [extensions.gnome.org](https://extensions.gnome.org/extension/88
    glib-compile-schemas schemas/
    ```
 
-3. Enable the extension:
+3. Restart GNOME Shell (required for GNOME Shell to discover the extension directory):
+   - **X11:** Press `Alt+F2`, type `r`, and press Enter
+   - **Wayland:** Log out and log back in
+
+4. Enable the extension:
    ```bash
    gnome-extensions enable gclip@Geomoon.dev
    ```
 
-4. Restart GNOME Shell:
-   - X11: Press `Alt+F2`, type `r`, press Enter
-   - Wayland: Log out and log back in
-
 ## Usage
 
-Press `Super+Shift+V` to open the popup at the pointer position. Start typing to search, pick an item to copy it to the clipboard, and the popup closes.
+Press `Super+Shift+V` to open the popup at the pointer position. Start typing to search, pick an item to automatically paste it into your active window, and the popup closes.
 
 | Action | Keyboard | Mouse |
 |--------|----------|-------|
 | Open the popup | `Super+Shift+V` (configurable) | – |
 | Move through the list | `↑` / `↓` | Hover an item |
-| Copy an item | `Enter` | Click the item |
+| Paste an item | `Enter` | Click the item |
 | Switch between Recent and Bookmarks | `←` / `→` | Click the tab |
 | Bookmark / remove bookmark | `Ctrl+B` | Bookmark button on the hovered item |
 | Delete an item | `Delete` | Trash button on the hovered item |
